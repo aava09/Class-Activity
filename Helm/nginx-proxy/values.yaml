@@ -5,7 +5,7 @@ wp:
     env: dev
     stack: wordpress
   image:
-    repository: aava09/nginx-proxy
+    repository: gcr.io/evident-flame-400500/nginx-proxy
     tag: latest
     pullPolicy: Always
   replicas: 5
