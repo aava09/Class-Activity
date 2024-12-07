@@ -1,23 +1,26 @@
-wp:
-  name: wp-proxy
-  labels:
-    app: wp-proxy
-    env: dev
-    stack: wordpress
-  image:
-    repository: gcr.io/evident-flame-400500/nginx-proxy
-    tag: latest
-    pullPolicy: Always
-  replicas: 5
-  rollingUpdate:
-    maxSurge: 1
-    maxUnavailable: 1
-  resources:
-    requests:
-      cpu: "150m"
-      memory: "128Mi"
-    limits:
-      cpu: "250m"
-      memory: "256Mi"
-  containerPorts:
-      http: 80
+replicaCount: 1
+namespace: proxy
+image:
+  repository: gcr.io/evident-flame-400500/nginx-proxy
+  pullPolicy: IfNotPresent
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 80
+
+config:
+  nginxConf: |
+    events {}
+
+    http {
+        server {
+            listen 80;
+            location / {
+                proxy_pass http://wordpress-app.wpapp.svc.cluster.local:80;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+        }
+    }
